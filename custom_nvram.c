@@ -1,6 +1,6 @@
-/* custom_nvram_6250.c
+/* custom_nvram.c
  *
- * Emulates the Netgear 6250's nvram functions
+ * Emulates the Netgear 6250/6400's nvram functions
  * by reading key=value pairs from /tmp/nvram.ini
  *
  * by Saumil Shah
@@ -14,11 +14,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <dlfcn.h>
-//
-// ../buildroot-2016.11.2/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc -shared -fPIC -o nvram.so nvram.c 
-// OR
-// compile it on carmel
-// gcc -muclibc -shared -fPIC -o custom_nvram_6250.so custom_nvram_6250.c
+
+// ./buildroot-2016.11.2/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc -shared -fPIC -o nvram.so nvram.c
 
 #define NVRAM_FILE      "/tmp/nvram.ini"
 #define NVRAM_ENTRIES   2000
@@ -149,6 +146,7 @@ int open(const char *pathname, int flags)
    return(r);
 }
 
+/* intercepted libnvram.so functions */
 char *acosNvramConfig_get(char *k)
 {
    char *v = "";
@@ -173,7 +171,7 @@ int acosNvramConfig_set(char *k, char *v) {
       custom_nvram_init();
 
    i = nvram_set(k, v);
- 
+
    printf("[nvram %d] acosNvramConfig_set('%s', '%s')\n", i, k, v);
    return(0);
 }
@@ -185,7 +183,7 @@ void acosNvramConfig_read(char *k, char *r, int len) {
 
    if(!nvram_init)
       custom_nvram_init();
- 
+
    v = nvram_get(k);
 
    strncpy(r, v, len);
@@ -206,10 +204,12 @@ int acosNvramConfig_match(char *k, char *v) {
 
    if(strcmp(s, v) == 0)
       r = 1;
- 
+
    printf("acosNvramConfig_match('%s', '%s') = %d\n", k, v, r);
    return(r);
 }
+
+/* intercepted other libacos_shared.so functions */
 
 int agApi_fwServiceAdd(char *k, int a, int b, int c) {
    printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
@@ -300,4 +300,3 @@ int agApi_fwGetNextTriggerConf(int a) {
    printf("agApi_fwGetNextTriggerConf(0x%08x) = 1\n", a);
    return(1);
 }
-
