@@ -10,7 +10,9 @@ Compiling custom_nvram.so
 
 To compile `custom_nvram.c` from `custom_nvram.c`, we need `buildroot`.
 
+```
 buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc -shared -fPIC -o custom_nvram.so custom_nvram.c
+```
 
 Invocation (for the Netgear Nighthawk R6250 router)
 
@@ -19,6 +21,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
      LD_PRELOAD=/tmp/custom_nvram.so
      /usr/sbin/httpd -S -E /usr/sbin/ca.pem /usr/sbin/httpsd.pem
 ```
+
+`custom_nvram.so` will look for a hardcoded file `/tmp/nvram.ini` containing the configuration data.
 
 References:
 
