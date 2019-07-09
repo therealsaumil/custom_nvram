@@ -5,24 +5,29 @@ Shared Library to intercept nvram get/set/match calls for emulating libnvram.so 
 
 Loosely based on Craig Heffner [@devttyS0](https://twitter.com/@devttyS0) and Zachary Cutlip [@zcutlip](https://twitter.com/zcutlip)'s work.
 
-Compiling custom_nvram.so
--------------------------
+custom_nvram.so for Netgear R6250 Nighthawk
+-------------------------------------------
 
-To compile `custom_nvram.c` from `custom_nvram.c`, we need `buildroot`.
+To compile `custom_nvram_r6250.so` from `custom_nvram_r6250.c`, we need `buildroot`.
 
 ```
-buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc -shared -fPIC -o custom_nvram.so custom_nvram.c
+buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc -shared -fPIC -o custom_nvram_r6250.so custom_nvram_r6250.c
 ```
 
-Invocation (for the Netgear Nighthawk R6250 router)
+Invocation
 
 ```
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-     LD_PRELOAD=/tmp/custom_nvram.so
+     LD_PRELOAD=/tmp/custom_nvram_r6250.so
      /usr/sbin/httpd -S -E /usr/sbin/ca.pem /usr/sbin/httpsd.pem
 ```
 
-`custom_nvram.so` will look for a hardcoded file `/tmp/nvram.ini` containing the configuration data.
+`custom_nvram_r6250.so` will look for a hardcoded file `/tmp/nvram.ini` containing the configuration data.
+
+custom_nvram.so for Cisco RV130W
+--------------------------------
+
+coming soon
 
 References:
 
