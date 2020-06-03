@@ -1,6 +1,11 @@
-notes.txt
-
+libnvram-armx
+nvram
+*.txt
+*.rep
+*.gpr
+*.log
 *.swp
+*.sh
 
 # Compiled source #
 ###################
