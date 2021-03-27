@@ -15,6 +15,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 int nvram_match(char *uParm1, char *pcParm2); // match
 int nvram_invmatch(char *uParm1, char *pcParm2); // match
@@ -31,6 +33,7 @@ static int counter = 0;
 static int (*real_system)(const char *command) = NULL;
 static FILE *(*real_fopen)(const char *filename, const char *mode) = NULL;
 static int (*real_open)(const char *pathname, int flags) = NULL;
+static int (*real_mknod)(const char *pathname, mode_t mode, dev_t dev) = NULL;
 
 // hook system()
 int system(const char *command)
@@ -73,6 +76,21 @@ int open(const char *pathname, int flags)
    r = real_open(pathname, flags);
 #ifdef VERBOSE
    printf("open('%s', %d) = %d\n", pathname, flags, r);
+#endif
+   return(r);
+}
+
+// hook mknod()
+int mknod(const char *pathname, mode_t mode, dev_t dev)
+{
+   int r;
+#ifdef VERBOSE
+   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+#endif
+   real_mknod = dlsym(RTLD_NEXT, "mknod");
+   r = real_mknod(pathname, mode, dev);
+#ifdef VERBOSE
+   printf("mknod('%s', %d, %d) = %d\n", pathname, mode, dev, r);
 #endif
    return(r);
 }
