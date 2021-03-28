@@ -23,7 +23,7 @@
 
 // function declarations
 char *get_process_name_by_pid();
-void print_caller_and_address();
+int print_caller_and_address();
 static int (*real_system)(const char *command) = NULL;
 static FILE *(*real_fopen)(const char *filename, const char *mode) = NULL;
 static int (*real_open)(const char *pathname, int flags) = NULL;
@@ -53,7 +53,7 @@ char *get_process_name_by_pid()
    return name;
 }
 
-void print_caller_and_address()
+int print_caller_and_address()
 {
    printf("%s [0x%08x] ", get_process_name_by_pid(), __builtin_return_address(0));  // get caller's address
 }

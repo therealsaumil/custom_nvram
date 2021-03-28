@@ -30,12 +30,8 @@ int nvram_unset(char *uParm1); // unset
 static int counter = 0;
 
 // function declarations
-extern char *get_process_name_by_pid();
-extern void print_caller_and_address();
+extern int print_caller_and_address();
 
-/*
-   printf("%s [0x%08x] ", get_process_name_by_pid(), __builtin_return_address(0));  // get caller's address
-*/
 /* acosNvram functions - call counterparts in libnvram.so */
 char *acosNvramConfig_get(char *k)
 {

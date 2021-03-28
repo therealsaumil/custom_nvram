@@ -21,10 +21,10 @@
 int nvram_set(char *uParm1, char *pcParm2); // set
 char *nvram_get(char *uParm1); // get
 int nvram_unset(char *uParm1); // unset
+static int (*real_get_flash_type)() = NULL;
 
 // function declarations
-extern char *get_process_name_by_pid();
-extern void print_caller_and_address();
+extern int print_caller_and_address();
 
 /*
 // hook GetCfmValue()
@@ -40,14 +40,20 @@ int GetCfmValue(char *name, char *value)
 }
 */
 
-// This is the only key function that we have to fake
+// Hook just to inspect what get_flash_type() returns
 int get_flash_type()
 {
+   int r;
+
+   if(!real_get_flash_type) {
+      real_get_flash_type = dlsym(RTLD_NEXT, "get_flash_type");
+   }
+   r = real_get_flash_type();
 #ifdef VERBOSE
    print_caller_and_address();
-   printf("get_flash_type() = 4\n");
+   printf("get_flash_type() = %d\n", r);
 #endif
-   return(4);
+   return(r);
 }
 
 // bcm_nvram_get --> nvram_get
