@@ -2,6 +2,7 @@ libnvram-armx
 nvram
 acos_nat.*
 *.txt
+!LICENSE.TXT
 *.rep
 *.gpr
 *.log
