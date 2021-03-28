@@ -25,83 +25,24 @@ int nvram_set(char *uParm1, char *pcParm2); // set
 char *nvram_get(char *uParm1); // get
 int nvram_unset(char *uParm1); // unset
 
-// ./buildroot-2013.05/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc [-DQUIET] -shared -fPIC -o nighthawk_hooks.so nighthawk_hooks.c
+// ./buildroot-2013.05/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc [-DQUIET] -shared -fPIC -o nighthawk_hooks.so nighthawk_hooks.c common_hooks.c
 
 static int counter = 0;
 
 // function declarations
-static int (*real_system)(const char *command) = NULL;
-static FILE *(*real_fopen)(const char *filename, const char *mode) = NULL;
-static int (*real_open)(const char *pathname, int flags) = NULL;
-static int (*real_mknod)(const char *pathname, mode_t mode, dev_t dev) = NULL;
+extern char *get_process_name_by_pid();
+extern void print_caller_and_address();
 
-// hook system()
-int system(const char *command)
-{
-   int r;
-#ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
-#endif
-   real_system = dlsym(RTLD_NEXT, "system");
-   r = real_system(command);
-#ifdef VERBOSE
-   printf("system('%s') = %d\n", command, r);
-#endif
-   return(r);
-}
-
-// hook fopen()
-FILE *fopen(const char *filename, const char *mode)
-{
-   FILE *fp;
-#ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
-#endif
-   real_fopen = dlsym(RTLD_NEXT, "fopen");
-   fp = real_fopen(filename, mode);
-#ifdef VERBOSE
-   printf("fopen('%s', '%s') = 0x%08x\n", filename, mode, (unsigned int) fp);
-#endif
-   return(fp);
-}
-
-// hook open()
-int open(const char *pathname, int flags)
-{
-   int r;
-#ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
-#endif
-   real_open = dlsym(RTLD_NEXT, "open");
-   r = real_open(pathname, flags);
-#ifdef VERBOSE
-   printf("open('%s', %d) = %d\n", pathname, flags, r);
-#endif
-   return(r);
-}
-
-// hook mknod()
-int mknod(const char *pathname, mode_t mode, dev_t dev)
-{
-   int r;
-#ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
-#endif
-   real_mknod = dlsym(RTLD_NEXT, "mknod");
-   r = real_mknod(pathname, mode, dev);
-#ifdef VERBOSE
-   printf("mknod('%s', %d, %d) = %d\n", pathname, mode, dev, r);
-#endif
-   return(r);
-}
-
+/*
+   printf("%s [0x%08x] ", get_process_name_by_pid(), __builtin_return_address(0));  // get caller's address
+*/
 /* acosNvram functions - call counterparts in libnvram.so */
 char *acosNvramConfig_get(char *k)
 {
    char *v = "";
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    v = nvram_get(k);
@@ -120,7 +61,7 @@ char *acosNvramConfig_exist(char *k)
    char *v = "";
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    v = nvram_get(k);
@@ -138,7 +79,7 @@ int acosNvramConfig_set(char *k, char *v) {
    int i;
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    i = nvram_set(k, v);
@@ -153,7 +94,7 @@ void acosNvramConfig_read(char *k, char *r, int len) {
    char* v = "";
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    //v = nvram_get(k);
@@ -169,7 +110,7 @@ int acosNvramConfig_unset(char *k) {
    int i;
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    i = nvram_unset(k);
@@ -185,7 +126,7 @@ int acosNvramConfig_match(char *k, char *v) {
    int r = 0;
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    r = nvram_match(k, v);
@@ -201,7 +142,7 @@ int acosNvramConfig_invmatch(char *k, char *v) {
    int r = 0;
 
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
 
    r = nvram_invmatch(k, v);
@@ -239,7 +180,7 @@ int acosNvramConfig_readAsInt(char *k, int *r) {
 
 int agApi_fwServiceAdd(char *k, int a, int b, int c) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
 #endif
    counter++;
 #ifdef VERBOSE
@@ -250,7 +191,7 @@ int agApi_fwServiceAdd(char *k, int a, int b, int c) {
 
 int agApi_fwURLFilterEnableTmSch_Session2(int x) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwURLFilterEnableTmSch_Session2(%d) = 0\n", x);
 #endif
    return(0);
@@ -258,7 +199,7 @@ int agApi_fwURLFilterEnableTmSch_Session2(int x) {
 
 int agApi_fwURLFilterEnable_Session2(int x) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwURLFilterEnable_Session2(%d) = 0\n", x);
 #endif
    return(0);
@@ -266,7 +207,7 @@ int agApi_fwURLFilterEnable_Session2(int x) {
 
 int agApi_tmschDelConf(char *k) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_tmschDelConf('%s') = 0\n", k);
 #endif
    return(0);
@@ -274,7 +215,7 @@ int agApi_tmschDelConf(char *k) {
 
 int agApi_tmschAddConf(char *a, char *b, char *c, char *d, char *e, int f, int g, int h) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_tmschAddConf('%s', '%s', '%s', '%s', '%s', %d, %d, %d)\n", a, b, c, d, e, f, g, h);
 #endif
    return(0);
@@ -282,7 +223,7 @@ int agApi_tmschAddConf(char *a, char *b, char *c, char *d, char *e, int f, int g
 
 int agApi_tmschDelConf_Session2(char *k) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_tmschDelConf_Session2('%s') = 0\n", k);
 #endif
    return(0);
@@ -290,7 +231,7 @@ int agApi_tmschDelConf_Session2(char *k) {
 
 int agApi_tmschAddConf_Session2(char *a, char *b, char *c, char *d, char *e, int f, int g, int h) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_tmschAddConf_Session2('%s', '%s', '%s', '%s', '%s', %d, %d, %d)\n", a, b, c, d, e, f, g, h);
 #endif
    return(0);
@@ -298,7 +239,7 @@ int agApi_tmschAddConf_Session2(char *a, char *b, char *c, char *d, char *e, int
 
 int agApi_fwBlkServModAction(char *k) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwBlkServModAction('%s') = 0\n", k);
 #endif
    return(0);
@@ -306,7 +247,7 @@ int agApi_fwBlkServModAction(char *k) {
 
 int agApi_fwBlkServModAction_Session2(char *k) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwBlkServModAction('%s') = 0\n", k);
 #endif
    return(0);
@@ -314,7 +255,7 @@ int agApi_fwBlkServModAction_Session2(char *k) {
 
 int agApi_fwEchoRespSet(int x) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwEchoRespSet(%d) = 1\n", x);
 #endif
    return(1);
@@ -322,7 +263,7 @@ int agApi_fwEchoRespSet(int x) {
 
 int agApi_fwURLFilterEnable(int x) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwURLFilterEnable(%d) = 0\n", x);
 #endif
    return(0);
@@ -330,7 +271,7 @@ int agApi_fwURLFilterEnable(int x) {
 
 int agApi_fwURLFilterEnableTmSch() {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwURLFilterEnableTmSch() = 0\n");
 #endif
    return(0);
@@ -338,7 +279,7 @@ int agApi_fwURLFilterEnableTmSch() {
 
 int agApi_fwGetAllServices(char *k, int a) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwGetAllServices('%s', %d) = %d\n", k, a, counter);
 #endif
    return(counter);
@@ -346,14 +287,14 @@ int agApi_fwGetAllServices(char *k, int a) {
 
 void agApi_fwDelTriggerConf2(char *k) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwDelTriggerConf2('%s')\n", k);
 #endif
 }
 
 int agApi_fwGetNextTriggerConf(int a) {
 #ifdef VERBOSE
-   printf("[0x%08x] ", __builtin_return_address(0));  // get caller's address
+   print_caller_and_address();
    printf("agApi_fwGetNextTriggerConf(0x%08x) = 1\n", a);
 #endif
    return(1);
