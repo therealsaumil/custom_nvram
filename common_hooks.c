@@ -19,15 +19,34 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-// ./buildroot-2013.05/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabi-gcc [-DQUIET] -shared -fPIC -o nighthawk_hooks.so nighthawk_hooks.c common_hooks.c
+void __attribute__ ((constructor)) my_init(void);
+void __attribute__ ((destructor)) my_fini(void);
 
 // function declarations
-char *get_process_name_by_pid();
 int print_caller_and_address();
+char *get_process_name_by_pid();
 static int (*real_system)(const char *command) = NULL;
 static FILE *(*real_fopen)(const char *filename, const char *mode) = NULL;
 static int (*real_open)(const char *pathname, int flags) = NULL;
 static int (*real_mknod)(const char *pathname, mode_t mode, dev_t dev) = NULL;
+
+void my_init(void) {
+   if(!real_fopen) {
+      real_fopen = dlsym(RTLD_NEXT, "fopen");
+   }
+   if(!real_system) {
+      real_system = dlsym(RTLD_NEXT, "system");
+   }
+   if(!real_open) {
+      real_open = dlsym(RTLD_NEXT, "open");
+   }
+   if(!real_mknod) {
+      real_mknod = dlsym(RTLD_NEXT, "mknod");
+   }
+}
+
+void my_fini(void) {
+}
 
 char *get_process_name_by_pid()
 {
@@ -36,9 +55,7 @@ char *get_process_name_by_pid()
    // ugly approach, but oh well, it works.
    sprintf(name, "/proc/%d/cmdline", getpid());
 
-   if(!real_fopen) {
-      real_fopen = dlsym(RTLD_NEXT, "fopen");
-   }
+   // real_fopen must be initialised by the constructor
    FILE *f = real_fopen(name, "r");
 
    if(f) {
@@ -65,9 +82,6 @@ int system(const char *command)
 #ifdef VERBOSE
    print_caller_and_address();
 #endif
-   if(!real_system) {
-      real_system = dlsym(RTLD_NEXT, "system");
-   }
    r = real_system(command);
 #ifdef VERBOSE
    printf("system('%s') = %d\n", command, r);
@@ -82,9 +96,6 @@ FILE *fopen(const char *filename, const char *mode)
 #ifdef VERBOSE
    print_caller_and_address();
 #endif
-   if(!real_fopen) {
-      real_fopen = dlsym(RTLD_NEXT, "fopen");
-   }
    fp = real_fopen(filename, mode);
 #ifdef VERBOSE
    printf("fopen('%s', '%s') = 0x%08x\n", filename, mode, (unsigned int) fp);
@@ -99,9 +110,6 @@ int open(const char *pathname, int flags)
 #ifdef VERBOSE
    print_caller_and_address();
 #endif
-   if(!real_open) {
-      real_open = dlsym(RTLD_NEXT, "open");
-   }
    r = real_open(pathname, flags);
 #ifdef VERBOSE
    printf("open('%s', %d) = %d\n", pathname, flags, r);
@@ -124,9 +132,6 @@ int mknod(const char *pathname, mode_t mode, dev_t dev)
       printf("mknod('%s', %d, %d) = SKIPPED\n", pathname, mode, dev);
 #endif
       return(0);
-   }
-   if(!real_mknod) {
-      real_mknod = dlsym(RTLD_NEXT, "mknod");
    }
    r = real_mknod(pathname, mode, dev);
 #ifdef VERBOSE
