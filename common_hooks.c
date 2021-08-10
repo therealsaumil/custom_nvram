@@ -25,12 +25,16 @@ void __attribute__ ((destructor)) my_fini(void);
 // function declarations
 int print_caller_and_address();
 char *get_process_name_by_pid();
+static int (*real_mknod)(const char *pathname, mode_t mode, dev_t dev) = NULL;
+
+#ifdef VERBOSE
 static int (*real_system)(const char *command) = NULL;
 static FILE *(*real_fopen)(const char *filename, const char *mode) = NULL;
 static int (*real_open)(const char *pathname, int flags) = NULL;
-static int (*real_mknod)(const char *pathname, mode_t mode, dev_t dev) = NULL;
+#endif
 
 void my_init(void) {
+#ifdef VERBOSE
    if(!real_fopen) {
       real_fopen = dlsym(RTLD_NEXT, "fopen");
    }
@@ -40,6 +44,7 @@ void my_init(void) {
    if(!real_open) {
       real_open = dlsym(RTLD_NEXT, "open");
    }
+#endif
    if(!real_mknod) {
       real_mknod = dlsym(RTLD_NEXT, "mknod");
    }
@@ -75,47 +80,46 @@ int print_caller_and_address()
    printf("%s [0x%08x] ", get_process_name_by_pid(), __builtin_return_address(0));  // get caller's address
 }
 
+#ifdef VERBOSE
 // hook system()
+// do this only if we are performing VERBOSE traces
+// otherwise it conflicts with libuClibc's system()
+// symbol
 int system(const char *command)
 {
    int r;
-#ifdef VERBOSE
    print_caller_and_address();
-#endif
    r = real_system(command);
-#ifdef VERBOSE
    printf("system('%s') = %d\n", command, r);
-#endif
    return(r);
 }
+#endif
 
+#ifdef VERBOSE
 // hook fopen()
+// do this only if we are performing VERBOSE traces
 FILE *fopen(const char *filename, const char *mode)
 {
    FILE *fp;
-#ifdef VERBOSE
    print_caller_and_address();
-#endif
    fp = real_fopen(filename, mode);
-#ifdef VERBOSE
    printf("fopen('%s', '%s') = 0x%08x\n", filename, mode, (unsigned int) fp);
-#endif
    return(fp);
 }
+#endif
 
+#ifdef VERBOSE
 // hook open()
+// do this only if we are performing VERBOSE traces
 int open(const char *pathname, int flags)
 {
    int r;
-#ifdef VERBOSE
    print_caller_and_address();
-#endif
    r = real_open(pathname, flags);
-#ifdef VERBOSE
    printf("open('%s', %d) = %d\n", pathname, flags, r);
-#endif
    return(r);
 }
+#endif
 
 // hook mknod()
 int mknod(const char *pathname, mode_t mode, dev_t dev)

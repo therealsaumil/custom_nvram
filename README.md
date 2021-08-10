@@ -1,6 +1,6 @@
-# custom_nvram - nvram hooks for devices emulated by [ARM-X][armx]
+# custom_nvram - nvram hooks for devices emulated by [ARMX][armx]
 
-ARM-X's `libnvram-armx.so` uses shared memory to store `nvram` data and extend
+ARMX's `libnvram-armx.so` uses shared memory to store `nvram` data and extend
 nvram support to emulated devices. Some of the key functions exported by this
 library are:
 
@@ -13,7 +13,7 @@ int nvram_invmatch(char *uParm1, char *pcParm2);
 char *nvram_get_ex2(char *uParm1, char *pcParm2, int sParm3);
 ```
 
-Devices emulated in ARM-X that need `nvram` support can `LD_PRELOAD` this
+Devices emulated in ARMX that need `nvram` support can `LD_PRELOAD` this
 library to provide wrappers for basic `nvram` manipulation functionality.
 
 ## nighthawk_hooks.so - Netgear Nighthawk R6250 and R6400
@@ -83,7 +83,7 @@ $CC $FLAGS -DVERBOSE -o tenda_hooks_verbose.so tenda_hooks.c
 ```
 
 
-# custom_nvram.so [OLD - superceded by [ARM-X][armx]'s approach]
+# custom_nvram.so [OLD - superceded by [ARMX][armx]'s approach]
 
 Note: These files are not maintained actively.
 Shared Library to intercept nvram get/set/match calls for emulating libnvram.so

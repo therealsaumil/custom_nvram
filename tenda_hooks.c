@@ -21,7 +21,7 @@
 int nvram_set(char *uParm1, char *pcParm2); // set
 char *nvram_get(char *uParm1); // get
 int nvram_unset(char *uParm1); // unset
-static int (*real_get_flash_type)() = NULL;
+//static int (*real_get_flash_type)() = NULL;
 
 // function declarations
 extern int print_caller_and_address();
@@ -41,6 +41,7 @@ int GetCfmValue(char *name, char *value)
 */
 
 // Hook just to inspect what get_flash_type() returns
+/*
 int get_flash_type()
 {
    int r;
@@ -55,6 +56,7 @@ int get_flash_type()
 #endif
    return(r);
 }
+*/
 
 // bcm_nvram_get --> nvram_get
 char *bcm_nvram_get(char *k)
